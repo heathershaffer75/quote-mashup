@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>🎭 Who Said It? — Setup → Punchline → Wisdom</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111111">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>">
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#1f2937; --card:#ffffff; --ink:#0b1020; --muted:#4b5563;
+    --accent:#111; --accent2:#111; --good:#0d9488; --warn:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  body{background:radial-gradient(1200px 700px at 20% -10%,#334155,transparent),
+       radial-gradient(1200px 700px at 100% 0%,#1f2937,transparent),
+       linear-gradient(180deg,var(--bg1),var(--bg2)); color:#111}
+  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+  .card{width:min(1100px,94vw);background:var(--card);border:3px solid var(--accent);
+        border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.25);padding:28px 28px 20px;position:relative}
+  .brand{position:absolute;right:-3px;top:-3px;background:#111;color:#fff;padding:8px 12px;border-bottom-left-radius:12px;font-size:13px;letter-spacing:.04em}
+  h1{margin:0 0 8px;font-size:34px;display:flex;align-items:center;gap:10px}
+  .sub{color:var(--muted);margin:0 0 16px}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .panel{border:2px solid var(--accent2);border-radius:16px;padding:16px;background:#fff;min-height:140px}
+  .title{font-size:13px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+  .setup{font-size:32px;line-height:1.2}
+  .punch,.wisdom{font-size:26px;line-height:1.25;display:none}
+  .wisdom{border-left:6px solid var(--good);padding-left:12px;background:linear-gradient(90deg,rgba(13,148,136,.08),transparent)}
+  .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+  button{font-size:18px;border:2px solid #111;background:#fff;border-radius:12px;padding:12px 16px;cursor:pointer;transition:.08s transform, .2s background}
+  button:hover{transform:translateY(-1px);background:#f8fafc}
+  button.primary{background:#111;color:#fff}
+  button.primary:hover{background:#0b0b0b}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .input{margin-top:10px}
+  textarea{width:100%;min-height:82px;font-size:18px;border:2px solid #111;border-radius:12px;padding:10px}
+  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .badge{font-size:14px;color:var(--muted)}
+  .tip{font-size:14px;color:var(--muted)}
+  .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .pill{border:2px solid #111;border-radius:999px;padding:6px 10px;background:#fff;font-size:14px}
+  .logo{font-size:24px}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;border:1px solid #999;border-bottom-width:3px;padding:2px 6px;border-radius:8px;background:#fff}
+  .spark{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  /* confetti */
+  .confetti{position:absolute;width:10px;height:14px;opacity:.9;will-change:transform;top:0;left:50%}
+  @media (max-width:980px){ .row{grid-template-columns:1fr} .logo{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" aria-live="polite">
+    <div class="brand">Cynics Anonymous™</div>
+    <div class="topbar">
+      <div class="logo">🎭🕵️‍♀️ <strong>Who Said It?</strong></div>
+      <div class="pill">Setup → <strong>Punchline</strong> → <strong>Wisdom</strong></div>
+    </div>
+
+    <h1>Quote Reveal <span class="sub">• laugh first • learn second</span></h1>
+
+    <div class="row">
+      <div class="panel" aria-labelledby="label-setup">
+        <div id="label-setup" class="title">Setup</div>
+        <div id="setup" class="setup"></div>
+        <div class="input">
+          <textarea id="userLine" placeholder="Say it aloud first, then (optional) jot your own completion…"></textarea>
+        </div>
+      </div>
+
+      <div class="panel" aria-labelledby="label-punch">
+        <div id="label-punch" class="title">Punchline (funny reveal)</div>
+        <div id="punch" class="punch"></div>
+      </div>
+
+      <div class="panel" aria-labelledby="label-wisdom">
+        <div id="label-wisdom" class="title">Wisdom (real takeaway)</div>
+        <div id="wisdom" class="wisdom"></div>
+      </div>
+    </div>
+
+    <div class="controls" role="group" aria-label="Controls">
+      <button id="revealPunch" class="primary" title="Show the funny completion">Show Punchline <span class="kbd">P</span></button>
+      <button id="revealWisdom" title="Show the real takeaway" disabled>Show Wisdom <span class="kbd">W</span></button>
+      <button id="next" title="Next card">Next <span class="kbd">N / →</span></button>
+      <button id="shuffle" title="Shuffle deck">Shuffle <span class="kbd">S</span></button>
+      <button id="copyLine" title="Copy your typed line">Copy My Line</button>
+      <button id="clearLine" title="Clear input">Clear</button>
+    </div>
+
+    <div class="footer">
+      <div class="badge" id="progress"></div>
+      <div class="tip">Facilitator tip: After wisdom, ask “What tiny action does this suggest for today?”</div>
+    </div>
+    <div class="spark" id="spark"></div>
+  </div>
+</div>
+
+<script>
+const deck = [
+  {s:"Recovery is like Wi‑Fi…", p:"…strongest near the router and nonexistent in the basement of my feelings.", w:"Connection strengthens recovery; isolation weakens it."},
+  {s:"My cravings show up like raccoons…", p:"…cute on TikTok, chaotic in my kitchen.", w:"Cravings pass; protect your environment while they do."},
+  {s:"The inner critic is basically…", p:"…an unpaid intern with a megaphone.", w:"Your inner critic isn’t truth—practice defusion and kinder self-talk."},
+  {s:"Meditation is just…", p:"…pretending my brain is a snow globe I’m too tired to shake.", w:"Short, consistent mindfulness reps beat perfection."},
+  {s:"Boundaries are like phone chargers…", p:"…everyone wants one, nobody knows where they left it.", w:"Clear, stated boundaries conserve energy and safety."},
+  {s:"Relapse prevention is kind of like…", p:"…installing baby gates for my amygdala.", w:"Plan simple if-then moves for your top triggers."},
+  {s:"Denial is the magician who…", p:"…makes consequences disappear and problems multiply.", w:"Denial delays pain; honesty starts healing."},
+  {s:"Early recovery is airplane mode where…", p:"…no one can reach me, including common sense.", w:"Pause > urge. Use HALT checks and grounding."},
+  {s:"A sponsor is just Google…", p:"…with better boundaries and fewer pop-ups.", w:"Ask for help early; accountability beats white-knuckling."},
+  {s:"Meetings are like Netflix…", p:"…confusing at first, then suddenly binge-worthy.", w:"Keep showing up—reps build skill and confidence."},
+  {s:"Self-care is the smoke alarm that…", p:"…keeps chirping even when I’m making toast.", w:"Sleep, food, movement stabilize mood and cravings."},
+  {s:"Triggers are pop-up ads that…", p:"…promise everything and deliver malware.", w:"Notice triggers, name them, choose the next right action."},
+  {s:"Procrastination is my emotional snooze button because…", p:"…I’ll definitely grow tomorrow, probably.", w:"Action beats avoidance—start tiny, start now."},
+  {s:"Urges talk like late-night infomercials:", p:"“For three low payments of your serenity!”", w:"Cravings sell urgency; you can delay and breathe."},
+  {s:"People-pleasing is a loyalty card that…", p:"…keeps giving points to people who never check out.", w:"People-pleasing costs self-respect; practice respectful ‘no’s."},
+  {s:"Honesty is the password reset that…", p:"…I should’ve used years ago.", w:"Radical honesty simplifies recovery and relationships."},
+  {s:"Excuses are coupons that…", p:"…expire right after you try to use them.", w:"Own choices; small accountability builds momentum."},
+  {s:"Catastrophizing is weather radar that…", p:"…sees hurricanes in every drizzle.", w:"Reality-testing and grounding reduce anxiety spirals."},
+  {s:"Rumination is a treadmill that…", p:"…goes nowhere at 6 mph.", w:"Shift from thinking to doing; tiny tasks break loops."},
+  {s:"Impulse control is a seatbelt that…", p:"…clicks before the crash, not after.", w:"Use a 10-second pause and a plan for hot moments."}
+];
+
+let order = [...Array(deck.length).keys()];
+let idx = 0;
+
+const elSetup = document.getElementById('setup');
+const elPunch = document.getElementById('punch');
+const elWisdom = document.getElementById('wisdom');
+const elUser = document.getElementById('userLine');
+const elProg = document.getElementById('progress');
+const elSpark = document.getElementById('spark');
+const btnPunch = document.getElementById('revealPunch');
+const btnWisdom = document.getElementById('revealWisdom');
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+}
+function render(){
+  const item = deck[order[idx]];
+  elSetup.textContent = "“" + item.s + "”";
+  elPunch.style.display = 'none';
+  elWisdom.style.display = 'none';
+  elPunch.textContent = item.p;
+  elWisdom.textContent = item.w;
+  elUser.value = '';
+  btnWisdom.disabled = true;
+  elProg.textContent = `Card ${idx+1} of ${deck.length}`;
+}
+function next(){ idx = (idx + 1) % deck.length; render(); }
+function revealPunch(){ elPunch.style.display = 'block'; btnWisdom.disabled = false; sparkle(22); }
+function revealWisdom(){ elWisdom.style.display = 'block'; sparkle(32); }
+function copyLine(){ navigator.clipboard.writeText(elUser.value || ""); }
+function clearLine(){ elUser.value = ""; }
+
+function sparkle(count=24){
+  for(let i=0;i<count;i++){
+    const d = document.createElement('div');
+    d.className = 'confetti';
+    d.style.left = (50 + (Math.random()*40-20)) + '%';
+    d.style.background = `hsl(${Math.random()*360},85%,55%)`;
+    d.style.transform = `translate(-50%, -10px) rotate(${Math.random()*180}deg)`;
+    elSpark.appendChild(d);
+    const tx = (Math.random()*2-1)*200;
+    const ty = 500 + Math.random()*400;
+    const rot = 360 + Math.random()*720;
+    const dur = 700 + Math.random()*900;
+    d.animate([
+      { transform:`translate(${tx}px,-20px) rotate(0deg)`, opacity:1 },
+      { transform:`translate(${tx}px,${ty}px) rotate(${rot}deg)`, opacity:0.9 }
+    ], { duration: dur, easing: 'cubic-bezier(.2,.7,.2,1)' }).onfinish = ()=> d.remove();
+  }
+}
+
+document.getElementById('next').onclick = next;
+btnPunch.onclick = revealPunch;
+btnWisdom.onclick = revealWisdom;
+document.getElementById('shuffle').onclick = ()=>{ shuffle(order); idx=0; render(); };
+document.getElementById('copyLine').onclick = copyLine;
+document.getElementById('clearLine').onclick = clearLine;
+
+document.addEventListener('keydown', (e)=>{
+  const k = e.key.toLowerCase();
+  if(k==='arrowright'||k==='n') next();
+  if(k==='p') revealPunch();
+  if(k==='w') revealWisdom();
+  if(k==='s') { shuffle(order); idx=0; render(); }
+});
+
+shuffle(order); render();
+</script>
+</body>
+</html>
